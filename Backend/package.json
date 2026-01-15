@@ -1,0 +1,28 @@
+{
+  "name": "vizsga-feladat",
+  "version": "1.0.0",
+  "description": "\"# VizsgaRemek-barbershop-\"",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/matyiontop/VizsgaRemek-barbershop-.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/matyiontop/VizsgaRemek-barbershop-/issues"
+  },
+  "homepage": "https://github.com/matyiontop/VizsgaRemek-barbershop-#readme",
+  "dependencies": {
+    "bcrypt": "^6.0.0",
+    "cors": "^2.8.5",
+    "dotenv": "^17.2.3",
+    "express": "^5.2.1",
+    "mysql2": "^3.16.0"
+  }
+}
