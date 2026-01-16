@@ -1,10 +1,11 @@
 import { Routes, Route, Link } from 'react-router-dom';
 // Később itt importálod majd a saját komponenseidet, pl:
 // import Login from './pages/Login';
+import Home from './pages/home';
 import Register from './pages/Register';
 // import Booking from './pages/Booking';
 
-function App() {
+function Menu() {
   return (
     <div>
       <nav>
@@ -16,7 +17,7 @@ function App() {
       </nav>
 
       <Routes>
-        <Route path="/" element={<h1>Üdvözöllek a Fodrászatban!</h1>} />
+        <Route path="/" element={<Home />} />
         <Route path="/login" element={<h1>Itt lesz a Login oldal</h1>} />
         <Route path="/register" element={<Register />} />
         <Route path="/booking" element={<h1>Itt lesz az Időpontfoglalás</h1>} />
@@ -25,4 +26,4 @@ function App() {
   );
 }
 
-export default App;
+export default Menu;
