@@ -1,0 +1,16 @@
+INSERT INTO fodrasz (fodrasz_id, nev) VALUES 
+(1, 'Németh Péter');
+
+INSERT INTO munkaido (munkaido_id, fodrasz_id, het_napja, nyitas, zaras, ebed_kezdete, ebed_vege) VALUES
+(1, 1, 'Hétfő', '08:00', '16:00', '12:00', '12:40'),
+(2, 1, 'Kedd', '08:00', '16:00', '12:00', '12:40'),
+(3, 1, 'Szerda', '08:00', '16:00', '12:00', '12:40'),
+(4, 1, 'Csütörtök', '08:00', '16:00', '12:00', '12:40'),
+(5, 1, 'Péntek', '08:00', '16:00', '12:00', '12:40'),
+(6, 1, 'Szombat', '08:00', '13:00', NULL, NULL);
+
+INSERT INTO szolgaltatas (szolgaltatas_id, tipus, ido, ar) VALUES
+(1, 'Gyerek hajvágás', 1, 2500),
+(2, 'Igazítás', 1, 3000),
+(3, 'Hajvágás', 2, 5000),
+(4, 'Hosszú hajvágás', 3, 8000);

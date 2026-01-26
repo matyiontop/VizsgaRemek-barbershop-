@@ -1,25 +1,25 @@
-const db = require('../db');
+const getDb = require('../db');
 
 // Időpontok listázása (JOIN-okkal, hogy neveket lássunk ID-k helyett)
 exports.getAllAppointments = async (req, res) => {
     try {
+        const db = await getDb();
         const sql = `
             SELECT 
-                időpont.időpont_id, 
-                ügyfél.név AS ugyfel_nev, 
-                fodrász.fodrász_id, 
-                szolgáltatás.típus AS szolgaltatas_nev, 
-                szolgáltatás.ár,
-                időpont.időpont_dátuma, 
-                időpont.kezdési_idő,
-                időpont.befejezési_idő,
-                időpont.állapot
-            FROM időpont
-            JOIN ügyfél ON időpont.ügyfél_id = ügyfél.ugyfel_id
-            JOIN fodrász ON időpont.fodrász_id = fodrász.fodrász_id
-            JOIN szolgáltatás ON időpont.szolgáltatás_id = szolgáltatás.szolgáltatás_id
+                idopont.idopont_id, 
+                felhasznalo.nev AS ugyfel_nev, 
+                fodrasz.nev AS fodrasz_nev, 
+                szolgaltatas.tipus AS szolgaltatas_nev, 
+                szolgaltatas.ar,
+                idopont.idopont_datuma, 
+                idopont.kezdesi_ido,
+                idopont.allapot
+            FROM idopont
+            JOIN felhasznalo ON idopont.felhasznalo_id = felhasznalo.felhasznalo_id
+            JOIN fodrasz ON idopont.fodrasz_id = fodrasz.fodrasz_id
+            JOIN szolgaltatas ON idopont.szolgaltatas_id = szolgaltatas.szolgaltatas_id
         `;
-        const [rows] = await db.query(sql);
+        const rows = await db.all(sql);
         res.status(200).json(rows);
     } catch (err) {
         console.error(err);
@@ -30,30 +30,28 @@ exports.getAllAppointments = async (req, res) => {
 // Új időpont foglalása
 exports.createAppointment = async (req, res) => {
     // A React ezeket az adatokat küldi majd
-    const { ugyfel_id, fodrasz_id, szolgaltatas_id, datum, kezdes } = req.body;
+    const { felhasznalo_id, fodrasz_id, szolgaltatas_id, idopont_datuma, kezdesi_ido } = req.body;
 
     try {
-        // 1. Lekérjük, mennyi ideig tart a szolgáltatás (a diagramod alapján a 'szolgáltatás' táblában van 'idő' oszlop)
-        const [szolg] = await db.query('SELECT idő FROM szolgáltatás WHERE szolgáltatás_id = ?', [szolgaltatas_id]);
+        const db = await getDb();
+        // 1. Lekérjük a szolgáltatást
+        const szolg = await db.get('SELECT ido FROM szolgaltatas WHERE szolgaltatas_id = ?', [szolgaltatas_id]);
         
-        if (szolg.length === 0) return res.status(404).json({ error: "Nincs ilyen szolgáltatás" });
+        if (!szolg) return res.status(404).json({ error: "Nincs ilyen szolgáltatás" });
 
-        const idotartam = szolg[0].idő; // pl. 30 (perc)
+        // Az adatbázis séma ('Adatbazis.txt') alapján az 'idopont' táblának nincs 'befejezesi_ido' oszlopa.
+        // Ha szeretnéd tárolni, add hozzá az oszlopot a CREATE TABLE parancshoz.
+        // Például: befejezesi_ido TEXT
+        // A számításhoz használhatod a 'strftime' SQLite függvényt:
+        // const befejezesi_ido = await db.get("SELECT strftime('%H:%M:%S', ?, ? || ' minutes')", [kezdesi_ido, szolg.ido]);
 
-        // 2. Kiszámoljuk a befejezési időt
-        // (Ez egy egyszerűsített megoldás, a vizsgán lehet, hogy elég szövegként kezelni az időt, 
-        // de profibb, ha Date objektummal számolsz. Most maradjunk az egyszerűségnél:)
-        // Tipp: A MySQL 'ADDTIME' függvényét is használhatnánk, de most egyszerűsítsünk:
-        
-        // SQL beszúrás a diagram szerinti oszlopnevekkel
         const sql = `
-            INSERT INTO időpont 
-            (ügyfél_id, fodrász_id, szolgáltatás_id, időpont_dátuma, kezdési_idő, befejezési_idő, állapot) 
-            VALUES (?, ?, ?, ?, ?, ADDTIME(?, SEC_TO_TIME(? * 60)), 'foglalt')
+            INSERT INTO idopont 
+            (felhasznalo_id, fodrasz_id, szolgaltatas_id, idopont_datuma, kezdesi_ido, allapot) 
+            VALUES (?, ?, ?, ?, ?, 'foglalva')
         `;
         
-        // Itt a MySQL-re bízzuk az idő összeadását (ADDTIME)
-        await db.query(sql, [ugyfel_id, fodrasz_id, szolgaltatas_id, datum, kezdes, kezdes, idotartam]);
+        await db.run(sql, [felhasznalo_id, fodrasz_id, szolgaltatas_id, idopont_datuma, kezdesi_ido]);
 
         res.status(201).json({ message: "Sikeres foglalás!" });
     } catch (err) {

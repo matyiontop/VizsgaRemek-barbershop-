@@ -1,0 +1,53 @@
+CREATE TABLE felhasznalo (
+    felhasznalo_id INTEGER PRIMARY KEY AUTOINCREMENT,
+    nev TEXT NOT NULL,
+    email TEXT NOT NULL UNIQUE,
+    jelszo TEXT NOT NULL,
+    engedely INTEGER NOT NULL DEFAULT 1,
+    szerep TEXT NOT NULL DEFAULT 'U'
+);
+
+CREATE TABLE fodrasz (
+    fodrasz_id INTEGER PRIMARY KEY AUTOINCREMENT,
+    nev TEXT NOT NULL
+);
+
+CREATE TABLE munkaido (
+    munkaido_id INTEGER PRIMARY KEY AUTOINCREMENT,
+    fodrasz_id INTEGER NOT NULL,
+    het_napja TEXT,
+    nyitas TEXT NOT NULL,
+    zaras TEXT NOT NULL,
+    ebed_kezdete TEXT,
+    ebed_vege TEXT,
+    FOREIGN KEY (fodrasz_id) REFERENCES fodrasz(fodrasz_id)
+);
+
+CREATE TABLE szolgaltatas (
+    szolgaltatas_id INTEGER PRIMARY KEY AUTOINCREMENT,
+    tipus TEXT NOT NULL,
+    ido INTEGER NOT NULL,
+    ar INTEGER NOT NULL
+);
+
+CREATE TABLE idosav (
+    idosav_id INTEGER PRIMARY KEY AUTOINCREMENT,
+    sav_sorszam INTEGER NOT NULL,
+    kezdes TEXT NOT NULL,
+    datum TEXT NOT NULL,
+    foglalt INTEGER DEFAULT 0
+);
+
+CREATE TABLE idopont (
+    idopont_id INTEGER PRIMARY KEY AUTOINCREMENT,
+    felhasznalo_id INTEGER NOT NULL,
+    fodrasz_id INTEGER NOT NULL,
+    szolgaltatas_id INTEGER NOT NULL,
+    idopont_datuma TEXT NOT NULL,
+    kezdesi_ido TEXT NOT NULL,
+    allapot TEXT DEFAULT 'foglalva',
+    FOREIGN KEY (felhasznalo_id) REFERENCES felhasznalo(felhasznalo_id),
+    FOREIGN KEY (fodrasz_id) REFERENCES fodrasz(fodrasz_id),
+    FOREIGN KEY (szolgaltatas_id) REFERENCES szolgaltatas(szolgaltatas_id)
+);
+

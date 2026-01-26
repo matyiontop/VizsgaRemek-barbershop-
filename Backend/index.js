@@ -1,29 +1,29 @@
 const express = require('express');
 const cors = require('cors');
-require('dotenv').config();
+const ugyfelRoutes = require('./routes/ugyfelRoutes');
+// const fodraszRoutes = require('./routes/fodraszRoutes'); // Ha majd lesz
+// const idopontRoutes = require('./routes/idopontRoutes'); // Ha majd lesz
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// Útvonalak importálása
-const ugyfelRoutes = require('./routes/ugyfelRoutes');
-const idopontRoutes = require('./routes/idopontRoutes');
-const szolgaltatasRoutes = require('./routes/szolgaltatasRoutes');
-const fodraszRoutes = require('./routes/fodraszRoutes');
+// Middleware-ek
+app.use(cors()); // Engedélyezi a kommunikációt a Frontenddel
+app.use(express.json()); // Engedélyezi a JSON adatok fogadását
 
-app.use(cors());
-app.use(express.json());
+// Útvonalak csatolása
+// Minden, ami '/api/ugyfelek'-kel kezdődik, az ugyfelRoutes-ba megy
+app.use('/api/ugyfelek', ugyfelRoutes);
 
-app.get('/', (req, res) => {
-    res.send('A fodrászati API fut!');
+// app.use('/api/fodraszok', fodraszRoutes); // Későbbi használatra
+// app.use('/api/idopontok', idopontRoutes); // Későbbi használatra
+
+// Alapértelmezett hibaüzenet, ha rossz címre küldünk kérést
+app.use((req, res) => {
+    res.status(404).json({ error: 'Az oldal nem található (404)' });
 });
 
-// Útvonalak használata
-app.use('/api/ugyfelek', ugyfelRoutes);
-app.use('/api/idopontok', idopontRoutes);
-app.use('/api/szolgaltatasok', szolgaltatasRoutes);
-app.use('/api/fodraszok', fodraszRoutes);
-
+// Szerver indítása
 app.listen(PORT, () => {
     console.log(`Szerver fut a http://localhost:${PORT} címen`);
 });
