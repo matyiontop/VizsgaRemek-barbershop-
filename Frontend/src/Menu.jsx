@@ -4,6 +4,7 @@ import { Routes, Route, Link } from 'react-router-dom';
 import Login from './pages/login';
 import Home from './pages/home';
 import Register from './pages/Register';
+import Admin from './pages/admin';
 // import Booking from './pages/Booking';
 import Footer from './footer';
 import './head-foot.css';
@@ -32,7 +33,7 @@ function Menu() {
           <Route path="/login" element={<Login setUser={setUser} />} />
           <Route path="/register" element={<Register />} />
           <Route path="/booking" element={<h1>Itt lesz az Időpontfoglalás</h1>} />
-          <Route path="/admin" element={<h1>Admin felület</h1>} />
+          <Route path="/admin" element={<Admin />} />
         </Routes>
       </main>
 
