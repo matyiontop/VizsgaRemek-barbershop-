@@ -1,13 +1,16 @@
+import { useState } from 'react';
 import { Routes, Route, Link } from 'react-router-dom';
 // Később itt importálod majd a saját komponenseidet, pl:
-// import Login from './pages/Login';
+import Login from './pages/login';
 import Home from './pages/home';
 import Register from './pages/Register';
 // import Booking from './pages/Booking';
-import Footer from './Footer';
+import Footer from './footer';
 import './head-foot.css';
 
 function Menu() {
+  const [user, setUser] = useState(null);
+
   return (
     <div className="app-container">
       <header>
@@ -15,20 +18,26 @@ function Menu() {
         <nav>
           {/* Ideiglenes menü a teszteléshez */}
           <Link to="/">Főoldal</Link>
-          <Link to="/login">Bejelentkezés</Link> 
-          <Link to="/register">Regisztráció</Link>
+          {!user && <Link to="/login">Bejelentkezés</Link>}
+          {!user && <Link to="/register">Regisztráció</Link>}
+          {user && <Link to="/admin">Admin</Link>}
           <Link to="/booking">Időpontfoglalás</Link>
+          {user && <Link to="/" onClick={() => setUser(null)}>Kijelentkezés</Link>}
         </nav>
       </header>
 
       <main>
         <Routes>
           <Route path="/" element={<Home />} />
-          <Route path="/login" element={<h1>Itt lesz a Login oldal</h1>} />
+          <Route path="/login" element={<Login setUser={setUser} />} />
           <Route path="/register" element={<Register />} />
           <Route path="/booking" element={<h1>Itt lesz az Időpontfoglalás</h1>} />
+          <Route path="/admin" element={<h1>Admin felület</h1>} />
         </Routes>
       </main>
+
+
+      
       <Footer />
     </div>
   );

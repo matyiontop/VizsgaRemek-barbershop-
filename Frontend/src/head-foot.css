@@ -1,11 +1,12 @@
 header
 {
-    background-image: url('../képek/hatter.png'); /* A ../ jelzi, hogy egy mappával feljebb keressük a képet */
+    background-image: url('képek/hatter.png');  /*A ../ jelzi, hogy egy mappával feljebb keressük a képet */
+    object-fit: cover;
     background-size: cover;
     background-position: center;
     background-repeat: no-repeat;
-    width: 100%;
-    height: 30vh;
+    width: auto;
+    height: 35vh;
     position: relative;
 }
 header nav {

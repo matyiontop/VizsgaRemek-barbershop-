@@ -8,7 +8,7 @@ function Footer() {
           <iframe 
             width="400" 
             height="250" 
-            src="https://maps.google.com/maps?q=Budapest&t=&z=13&ie=UTF8&iwloc=&output=embed"
+            src="https://maps.google.com/maps?q=kiskunhalas &t=&z=13&ie=UTF8&iwloc=&output=embed"
             title="Térkép"
           ></iframe>
         </div>
