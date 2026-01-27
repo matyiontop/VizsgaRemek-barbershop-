@@ -5,6 +5,7 @@ import Login from './pages/Login';
 import Home from './pages/home';
 import Register from './pages/Register';
 import Admin from './pages/admin';
+import Naptar from './pages/naptar';
 // import Booking from './pages/Booking';
 import Footer from './footer';
 import './head-foot.css';
@@ -32,7 +33,7 @@ function Menu() {
           <Route path="/" element={<Home />} />
           <Route path="/login" element={<Login setUser={setUser} />} />
           <Route path="/register" element={<Register />} />
-          <Route path="/booking" element={<h1>Itt lesz az Időpontfoglalás</h1>} />
+          <Route path="/booking" element={<Naptar />} />
           <Route path="/admin" element={<Admin />} />
         </Routes>
       </main>
