@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Routes, Route, Link } from 'react-router-dom';
 // Később itt importálod majd a saját komponenseidet, pl:
-import Login from './Login';
+import Login from './pages/Login';
 import Home from './pages/home';
 import Register from './pages/Register';
 import Admin from './pages/admin';
