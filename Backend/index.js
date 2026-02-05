@@ -4,6 +4,7 @@ const ugyfelRoutes = require('./routes/ugyfelRoutes');
 const fodraszRoutes = require('./routes/fodraszRoutes');
 const idopontRoutes = require('./routes/idopontRoutes');
 const szolgaltatasRoutes = require('./routes/szolgaltatasRoutes');
+const munkaidoRoutes = require('./routes/munkaidoRoutes');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -19,6 +20,7 @@ app.use('/api/ugyfelek', ugyfelRoutes);
 app.use('/api/fodraszok', fodraszRoutes);
 app.use('/api/idopontok', idopontRoutes);
 app.use('/api/szolgaltatasok', szolgaltatasRoutes);
+app.use('/api/munkaido', munkaidoRoutes);
 
 // Alapértelmezett hibaüzenet, ha rossz címre küldünk kérést
 app.use((req, res) => {
