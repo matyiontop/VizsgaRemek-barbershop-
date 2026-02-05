@@ -1,8 +1,9 @@
 const express = require('express');
 const cors = require('cors');
 const ugyfelRoutes = require('./routes/ugyfelRoutes');
-// const fodraszRoutes = require('./routes/fodraszRoutes'); // Ha majd lesz
-// const idopontRoutes = require('./routes/idopontRoutes'); // Ha majd lesz
+const fodraszRoutes = require('./routes/fodraszRoutes');
+const idopontRoutes = require('./routes/idopontRoutes');
+const szolgaltatasRoutes = require('./routes/szolgaltatasRoutes');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -15,8 +16,9 @@ app.use(express.json()); // Engedélyezi a JSON adatok fogadását
 // Minden, ami '/api/ugyfelek'-kel kezdődik, az ugyfelRoutes-ba megy
 app.use('/api/ugyfelek', ugyfelRoutes);
 
-// app.use('/api/fodraszok', fodraszRoutes); // Későbbi használatra
-// app.use('/api/idopontok', idopontRoutes); // Későbbi használatra
+app.use('/api/fodraszok', fodraszRoutes);
+app.use('/api/idopontok', idopontRoutes);
+app.use('/api/szolgaltatasok', szolgaltatasRoutes);
 
 // Alapértelmezett hibaüzenet, ha rossz címre küldünk kérést
 app.use((req, res) => {

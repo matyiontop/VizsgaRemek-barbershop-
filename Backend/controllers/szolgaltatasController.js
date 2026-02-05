@@ -4,7 +4,8 @@ exports.getAllServices = async (req, res) => {
     try {
         const db = await getDb();
         // Lekérjük az összes szolgáltatást az adatbázisból
-        const rows = await db.all('SELECT * FROM szolgaltatas');
+        // A kérésnek megfelelően kiszámoljuk az időtartamot percben (ido * 20)
+        const rows = await db.all('SELECT *, (ido * 20) as idotartam_perc FROM szolgaltatas');
         res.status(200).json(rows);
     } catch (error) {
         console.error('Hiba a szolgáltatások lekérdezésekor:', error);

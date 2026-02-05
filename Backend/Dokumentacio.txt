@@ -1,0 +1,61 @@
+# Rendszer Dokumentáció - Németh Fodrászat
+
+## 1. Funkciók és Igények
+
+A rendszer célja egy fodrászat időpontfoglalási és ügyfélkezelési folyamatainak digitalizálása, modern webes technológiák segítségével.
+
+### Felhasználói Funkciók (Frontend):
+- **Regisztráció:** Új felhasználók létrehozása név, email és jelszó megadásával. Validáció biztosítja, hogy minden mező ki legyen töltve.
+- **Bejelentkezés:** Meglévő felhasználók beléptetése email és jelszó alapján. A rendszer ellenőrzi a hitelesítő adatokat az adatbázisban.
+- **Kijelentkezés:** A felhasználói munkamenet megszüntetése (kliens oldali állapot törlése).
+- **Időpontfoglalás:** A felhasználók időpontot foglalhatnak egy adott fodrászhoz és szolgáltatáshoz (Naptár nézet).
+- **Adminisztráció:** Adminisztrátori felület a foglalások és felhasználók kezelésére (jogosultság alapú hozzáférés).
+
+### Backend Funkciók:
+- **Adatbázis kommunikáció:** Kapcsolódás a Cloudflare D1 felhő alapú adatbázishoz REST API hívásokon keresztül.
+- **Hitelesítés:** Jelszavak biztonságos tárolása `bcrypt` hash-eléssel.
+- **API kiszolgálás:** JSON formátumú adatcsere biztosítása a frontend számára.
+
+## 2. Technikai Igények és Környezet
+- **Backend:** Node.js futtatókörnyezet, Express keretrendszer.
+- **Adatbázis:** Cloudflare D1 (SQLite kompatibilis relációs adatbázis).
+- **Frontend:** React könyvtár, React Router a navigációhoz (SPA - Single Page Application).
+- **Biztonság:** Jelszavak titkosítása, környezeti változók (.env) használata az érzékeny adatokhoz (Cloudflare API tokenek).
+
+## 3. API Végpontok (Backend Routes)
+
+A szerver a `/api` prefixet használja az alábbi végpontokhoz. A kommunikáció JSON formátumban történik.
+
+### Ügyfélkezelés (`/api/ugyfelek`)
+- **POST** `/api/ugyfelek/regisztracio`
+  - **Funkció:** Új felhasználó regisztrálása.
+  - **Bemenet:** `{ nev, email, jelszo }`
+  - **Válasz:** 201 Created (siker), 400 Bad Request (hiányzó adat), 409 Conflict (foglalt email).
+
+- **POST** `/api/ugyfelek/bejelentkezes`
+  - **Funkció:** Felhasználó beléptetése.
+  - **Bemenet:** `{ email, jelszo }`
+  - **Válasz:** 200 OK (felhasználó adataival), 401 Unauthorized (hibás jelszó/email).
+
+### További Kontroller Funkciók (Implementálva, route bekötésre várva)
+- **GET** `/api/idopontok` (getAllAppointments)
+  - **Funkció:** Összes időpont lekérdezése részletes adatokkal (JOIN).
+- **POST** `/api/idopontok` (createAppointment)
+  - **Funkció:** Új időpont rögzítése.
+
+## 4. Frontend Útvonalak (React Router)
+
+A kliens oldali navigáció az alábbi útvonalakat kezeli a `Menu.jsx` alapján:
+
+- `/` - **Főoldal (Home):** A weboldal nyitólapja.
+- `/login` - **Bejelentkezés:** Belépési űrlap (csak kijelentkezett állapotban látható).
+- `/register` - **Regisztráció:** Regisztrációs űrlap (csak kijelentkezett állapotban látható).
+- `/booking` - **Időpontfoglalás:** Naptár nézet és foglalás indítása.
+- `/admin` - **Admin felület:** Adminisztrációs dashboard (csak bejelentkezett felhasználóknak).
+
+## 5. Adatbázis Modell (Összefoglaló)
+
+A rendszer relációs adatbázist használ az alábbi fő entitásokkal:
+- **felhasznalo:** Ügyfelek adatai és jogosultsági szintjei.
+- **idopont:** A foglalások központi táblája, amely összeköti a felhasználót, a fodrászt és a szolgáltatást.
+- **fodrasz, szolgaltatas, munkaido, idosav:** Törzsadatok a foglalási rendszer működéséhez.
