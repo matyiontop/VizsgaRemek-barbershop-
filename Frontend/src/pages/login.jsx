@@ -14,7 +14,7 @@ export default function Login({ setUser }) {
         setError('');
 
         try {
-            const response = await fetch('http://localhost:3000/api/ugyfelek/bejelentkezes', {
+            const response = await fetch('http://localhost:3000/api/ugyfelek/login', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',

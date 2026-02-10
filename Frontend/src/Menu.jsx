@@ -11,20 +11,34 @@ import Footer from './footer';
 import './head-foot.css';
 
 function Menu() {
-  const [user, setUser] = useState(null);
+  // Betöltéskor megnézzük, van-e mentett felhasználó a localStorage-ban
+  const [user, setUser] = useState(() => {
+    const saved = localStorage.getItem('user');
+    return saved ? JSON.parse(saved) : null;
+  });
+
+  const handleLogout = () => {
+    localStorage.removeItem('user');
+    setUser(null);
+  };
 
   return (
     <div className="app-container">
       <header>
         <h1>Németh fodrászat</h1>
         <nav>
-          {/* Ideiglenes menü a teszteléshez */}
           <Link to="/">Főoldal</Link>
+          
           {!user && <Link to="/login">Bejelentkezés</Link>}
           {!user && <Link to="/register">Regisztráció</Link>}
-          {user && <Link to="/admin">Admin</Link>}
-          <Link to="/booking">Időpontfoglalás</Link>
-          {user && <Link to="/" onClick={() => setUser(null)}>Kijelentkezés</Link>}
+          
+          {/* Csak Adminnak (A) */}
+          {user && user.jogosultsag === 'A' && <Link to="/admin">Admin</Link>}
+          
+          {/* Csak bejelentkezett felhasználónak */}
+          {user && <Link to="/booking">Időpontfoglalás</Link>}
+          
+          {user && <Link to="/" onClick={handleLogout}>Kijelentkezés</Link>}
         </nav>
       </header>
 

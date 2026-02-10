@@ -15,7 +15,7 @@ export default function Register() {
         setError('');
 
         try {
-            const response = await fetch('http://localhost:3000/api/ugyfelek/regisztracio', {
+            const response = await fetch('http://localhost:3000/api/ugyfelek/register', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',

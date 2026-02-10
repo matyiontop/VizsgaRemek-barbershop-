@@ -1,38 +1,95 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 
 function Admin() {
-    // Ideiglenes adatok a demonstrációhoz (később API-ból jönne)
-    const [users, setUsers] = useState([
-        { id: 1, name: 'Kiss János', banned: false },
-        { id: 2, name: 'Nagy Éva', banned: true },
-        { id: 3, name: 'Kovács Péter', banned: false },
-        { id: 4, name: 'Tóth Anna', banned: false },
-    ]);
+    const navigate = useNavigate();
+
+    // Biztonsági ellenőrzés: Ha nem admin, irányítsuk át!
+    useEffect(() => {
+        const userStr = localStorage.getItem('user');
+        if (!userStr) {
+            navigate('/'); // Ha nincs bejelentkezve
+            return;
+        }
+        const user = JSON.parse(userStr);
+        if (user.jogosultsag !== 'A') {
+            navigate('/'); // Ha be van jelentkezve, de nem Admin
+        }
+    }, [navigate]);
+
+    // Valós adatok tárolása
+    const [users, setUsers] = useState([]);
     const [searchTerm, setSearchTerm] = useState('');
     const [selectedUser, setSelectedUser] = useState(null);
 
+    // Adatok betöltése a backendről
+    const fetchUsers = async () => {
+        try {
+            const response = await fetch('http://localhost:3000/api/ugyfelek');
+            const data = await response.json();
+            setUsers(data);
+        } catch (error) {
+            console.error("Hiba a felhasználók betöltésekor:", error);
+        }
+    };
+
+    useEffect(() => {
+        fetchUsers();
+    }, []);
+
     // Keresés logika
     const filteredUsers = users.filter(user => 
-        user.name.toLowerCase().includes(searchTerm.toLowerCase())
+        user.nev.toLowerCase().includes(searchTerm.toLowerCase())
     );
 
     // Felhasználó kiválasztása
     const handleSelectUser = (user) => {
-        setSelectedUser({ ...user });
+        // Másolatot készítünk és hozzáadunk egy üres jelszó mezőt a szerkesztéshez
+        setSelectedUser({ ...user, newPassword: '' });
     };
 
     // Módosítások mentése
-    const handleSave = () => {
-        setUsers(users.map(u => u.id === selectedUser.id ? selectedUser : u));
-        alert('Sikeres mentés!');
-        setSelectedUser(null);
+    const handleSave = async () => {
+        try {
+            const response = await fetch(`http://localhost:3000/api/ugyfelek/${selectedUser.felhasznalo_id}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    nev: selectedUser.nev,
+                    email: selectedUser.email,
+                    szerep: selectedUser.szerep,
+                    engedely: selectedUser.engedely,
+                    jelszo: selectedUser.newPassword // Csak akkor küldjük, ha van értéke
+                })
+            });
+
+            if (response.ok) {
+                alert('Sikeres mentés!');
+                setSelectedUser(null);
+                fetchUsers(); // Lista frissítése
+            } else {
+                alert('Hiba a mentés során!');
+            }
+        } catch (error) {
+            console.error(error);
+        }
     };
 
     // Felhasználó törlése
-    const handleDelete = () => {
+    const handleDelete = async () => {
         if (window.confirm('Biztosan törölni szeretné ezt a felhasználót?')) {
-            setUsers(users.filter(u => u.id !== selectedUser.id));
-            setSelectedUser(null);
+            try {
+                const response = await fetch(`http://localhost:3000/api/ugyfelek/${selectedUser.felhasznalo_id}`, {
+                    method: 'DELETE'
+                });
+                if (response.ok) {
+                    alert('Felhasználó törölve!');
+                    setSelectedUser(null);
+                    fetchUsers();
+                }
+            } catch (error) {
+                console.error(error);
+            }
         }
     };
 
@@ -55,11 +112,11 @@ function Admin() {
                         <ul className="admin-user-list">
                             {filteredUsers.map(user => (
                                 <li 
-                                    key={user.id} 
+                                    key={user.felhasznalo_id} 
                                     onClick={() => handleSelectUser(user)}
-                                    className={`admin-user-list-item ${selectedUser?.id === user.id ? 'selected' : ''}`}
+                                    className={`admin-user-list-item ${selectedUser?.felhasznalo_id === user.felhasznalo_id ? 'selected' : ''}`}
                                 >
-                                    {user.name} {user.banned ? '(Letiltva)' : ''}
+                                    {user.nev} {user.engedely === 0 ? '(Letiltva)' : ''}
                                 </li>
                             ))}
                         </ul>
@@ -72,11 +129,24 @@ function Admin() {
                         <div className="bej-reg_szoveg admin-edit-form">
                             <h3>Szerkesztés</h3>
                             <label>Név:</label>
-                            <input type="text" value={selectedUser.name} onChange={(e) => setSelectedUser({...selectedUser, name: e.target.value})} />
+                            <input type="text" value={selectedUser.nev} onChange={(e) => setSelectedUser({...selectedUser, nev: e.target.value})} />
+                            
+                            <label>Email:</label>
+                            <input type="email" value={selectedUser.email} onChange={(e) => setSelectedUser({...selectedUser, email: e.target.value})} />
+                            
+                            <label>Jelszó módosítása (opcionális):</label>
+                            <input type="password" placeholder="Új jelszó..." value={selectedUser.newPassword} onChange={(e) => setSelectedUser({...selectedUser, newPassword: e.target.value})} />
                             
                             <div className="admin-checkbox-container">
                                 <label className="admin-checkbox-label">
-                                    <input type="checkbox" checked={selectedUser.banned} onChange={(e) => setSelectedUser({...selectedUser, banned: e.target.checked})} />
+                                    <input 
+                                        type="checkbox" 
+                                        checked={selectedUser.engedely === 0} 
+                                        onChange={(e) => {
+                                            // Ha bepipáljuk -> 0 (Letiltva), ha kivesszük -> 1 (Engedélyezve)
+                                            setSelectedUser({...selectedUser, engedely: e.target.checked ? 0 : 1})
+                                        }} 
+                                    />
                                     Felhasználó letiltása
                                 </label>
                             </div>
