@@ -74,3 +74,22 @@ exports.deleteAppointment = async (req, res) => {
         res.status(500).json({ error: "Hiba a törléskor" });
     }
 };
+
+// Belső függvény a tisztításhoz (nem igényel req/res objektumot)
+exports.performCleanup = async () => {
+    const db = await getDb();
+    const sql = "DELETE FROM idopont WHERE idopont_datuma < date('now', '-1 day')";
+    return await db.run(sql);
+};
+
+// Régi (1 napnál régebbi) időpontok törlése
+exports.deleteOldAppointments = async (req, res) => {
+    try {
+        // Meghívjuk a fenti közös függvényt
+        const result = await exports.performCleanup();
+        res.status(200).json({ message: 'Régi időpontok törölve!', torolt_adatok: result.changes });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ error: "Hiba a tisztításkor" });
+    }
+};

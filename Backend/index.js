@@ -5,6 +5,7 @@ const fodraszRoutes = require('./routes/fodraszRoutes');
 const idopontRoutes = require('./routes/idopontRoutes');
 const szolgaltatasRoutes = require('./routes/szolgaltatasRoutes');
 const munkaidoRoutes = require('./routes/munkaidoRoutes');
+const idopontController = require('./controllers/idopontController'); // Kontroller importálása az automatizáláshoz
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -30,4 +31,17 @@ app.use((req, res) => {
 // Szerver indítása
 app.listen(PORT, () => {
     console.log(`Szerver fut a http://localhost:${PORT} címen`);
+
+    // --- AUTOMATIKUS KARBANTARTÁS ---
+    // 1. Lefuttatjuk a tisztítást a szerver indulásakor
+    idopontController.performCleanup()
+        .then(() => console.log('Karbantartás: Régi időpontok sikeresen törölve.'))
+        .catch(err => console.error('Karbantartás hiba:', err));
+
+    // 2. Beállítjuk, hogy 24 óránként (86400000 ms) ismétlődjön meg
+    setInterval(() => {
+        idopontController.performCleanup()
+            .then(() => console.log('Napi karbantartás: Régi időpontok törölve.'))
+            .catch(err => console.error('Napi karbantartás hiba:', err));
+    }, 24 * 60 * 60 * 1000);
 });
