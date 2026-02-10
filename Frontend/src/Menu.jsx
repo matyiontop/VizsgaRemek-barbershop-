@@ -6,6 +6,7 @@ import Home from './pages/home';
 import Register from './pages/Register';
 import Admin from './pages/admin';
 import Naptar from './pages/naptar';
+import Profile from './pages/Profile';
 // import Booking from './pages/Booking';
 import Footer from './footer';
 import './head-foot.css';
@@ -37,6 +38,7 @@ function Menu() {
           
           {/* Csak bejelentkezett felhasználónak */}
           {user && <Link to="/booking">Időpontfoglalás</Link>}
+          {user && <Link to="/profile">Profilom</Link>}
           
           {user && <Link to="/" onClick={handleLogout}>Kijelentkezés</Link>}
         </nav>
@@ -49,6 +51,7 @@ function Menu() {
           <Route path="/register" element={<Register />} />
           <Route path="/booking" element={<Naptar />} />
           <Route path="/admin" element={<Admin />} />
+          <Route path="/profile" element={<Profile />} />
         </Routes>
       </main>
 
