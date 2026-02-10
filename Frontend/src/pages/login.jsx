@@ -1,5 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { Message, useToaster } from 'rsuite';
+import 'rsuite/dist/rsuite.min.css';
 import '../index.css';
 
 export default function Login({ setUser }) {
@@ -7,6 +9,7 @@ export default function Login({ setUser }) {
     const [jelszo, setJelszo] = useState('');
     const [error, setError] = useState('');
     const navigate = useNavigate();
+    const toaster = useToaster();
 
     const handleLogin = async (e) => {
         e.preventDefault();
@@ -28,21 +31,30 @@ export default function Login({ setUser }) {
                 // Felhasználói adatok mentése a böngészőbe
                 localStorage.setItem('user', JSON.stringify(data));
                 setUser(data);
-                alert('Sikeres bejelentkezés!');
+                
+                toaster.push(
+                    <Message type="success" header="Siker">Sikeres bejelentkezés!</Message>,
+                    { placement: 'topCenter', duration: 3000 }
+                );
                 navigate('/'); // Átirányítás a főoldalra
             } else {
-                setError(data.error || 'Hibás email vagy jelszó!');
+                toaster.push(
+                    <Message type="error" header="Hiba">{data.error || 'Hibás email vagy jelszó!'}</Message>,
+                    { placement: 'topCenter', duration: 4000 }
+                );
             }
         } catch (err) {
             console.error(err);
-            setError('Nem sikerült csatlakozni a szerverhez.');
+            toaster.push(
+                <Message type="error" header="Hiba">Nem sikerült csatlakozni a szerverhez.</Message>,
+                { placement: 'topCenter', duration: 4000 }
+            );
         }
     };
 
     return (
         <div className="bej-reg_doboz">
             <h2>Bejelentkezés</h2>
-            {error && <p style={{ color: 'red' }}>{error}</p>}
             <form onSubmit={handleLogin} className="bej-reg_szoveg">
                 <label>Email:</label>
                 <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} required />

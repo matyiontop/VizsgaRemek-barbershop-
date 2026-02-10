@@ -1,5 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { Message, useToaster } from 'rsuite';
+import 'rsuite/dist/rsuite.min.css';
 import '../index.css';
 
 export default function Register() {
@@ -8,6 +10,7 @@ export default function Register() {
     const [jelszo, setJelszo] = useState('');
     const [error, setError] = useState('');
     const navigate = useNavigate();
+    const toaster = useToaster();
 
     const handleRegister = async (e) => {
         e.preventDefault();
@@ -26,21 +29,29 @@ export default function Register() {
             const data = await response.json();
 
             if (response.ok) {
-                alert('Sikeres regisztráció!');
+                toaster.push(
+                    <Message type="success" header="Siker">Sikeres regisztráció! Jelentkezz be.</Message>,
+                    { placement: 'topCenter', duration: 3000 }
+                );
                 navigate('/login'); // Átirányítás a bejelentkezéshez
             } else {
-                setError(data.error || 'Hiba történt a regisztráció során.');
+                toaster.push(
+                    <Message type="error" header="Hiba">{data.error || 'Hiba történt a regisztráció során.'}</Message>,
+                    { placement: 'topCenter', duration: 4000 }
+                );
             }
         } catch (err) {
             console.error(err);
-            setError('Nem sikerült csatlakozni a szerverhez.');
+            toaster.push(
+                <Message type="error" header="Hiba">Nem sikerült csatlakozni a szerverhez.</Message>,
+                { placement: 'topCenter', duration: 4000 }
+            );
         }
     };
 
     return (
         <div className="bej-reg_doboz">
             <h2>Regisztráció</h2>
-            {error && <p style={{ color: 'red' }}>{error}</p>}
             <form onSubmit={handleRegister} className="bej-reg_szoveg">
                 <label>Név:</label>
                 <input type="text" value={nev} onChange={(e) => setNev(e.target.value)} required />

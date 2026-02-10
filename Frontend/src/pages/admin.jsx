@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { Modal, Button, Message, useToaster } from 'rsuite';
+import 'rsuite/dist/rsuite.min.css';
 
 function Admin() {
     const navigate = useNavigate();
@@ -23,6 +25,11 @@ function Admin() {
     const [activeTab, setActiveTab] = useState('users'); // Melyik fül aktív: 'users' vagy 'appointments'
     const [searchTerm, setSearchTerm] = useState('');
     const [selectedUser, setSelectedUser] = useState(null);
+    
+    // Modal és Értesítés állapotok
+    const [modalOpen, setModalOpen] = useState(false);
+    const [deleteAction, setDeleteAction] = useState(null); // Melyik törlési funkció fusson le
+    const toaster = useToaster();
 
     // Adatok betöltése a backendről
     const fetchUsers = async () => {
@@ -84,49 +91,70 @@ function Admin() {
             });
 
             if (response.ok) {
-                alert('Sikeres mentés!');
+                toaster.push(<Message type="success">Sikeres mentés!</Message>, { placement: 'topCenter' });
                 setSelectedUser(null);
                 fetchUsers(); // Lista frissítése
             } else {
-                alert('Hiba a mentés során!');
+                toaster.push(<Message type="error">Hiba a mentés során!</Message>, { placement: 'topCenter' });
             }
         } catch (error) {
             console.error(error);
+            toaster.push(<Message type="error">Hálózati hiba!</Message>, { placement: 'topCenter' });
         }
     };
 
-    // Felhasználó törlése
-    const handleDelete = async () => {
-        if (window.confirm('Biztosan törölni szeretné ezt a felhasználót?')) {
-            try {
-                const response = await fetch(`http://localhost:3000/api/ugyfelek/${selectedUser.felhasznalo_id}`, {
-                    method: 'DELETE'
-                });
-                if (response.ok) {
-                    alert('Felhasználó törölve!');
-                    setSelectedUser(null);
-                    fetchUsers();
-                }
-            } catch (error) {
-                console.error(error);
+    // --- TÖRLÉS KEZELÉS (MODAL) ---
+    
+    // Felhasználó törlésének előkészítése
+    const confirmDeleteUser = () => {
+        setDeleteAction(() => executeDeleteUser);
+        setModalOpen(true);
+    };
+
+    // Időpont törlésének előkészítése
+    const confirmDeleteAppointment = (id) => {
+        setDeleteAction(() => () => executeDeleteAppointment(id));
+        setModalOpen(true);
+    };
+
+    // Tényleges felhasználó törlés
+    const executeDeleteUser = async () => {
+        try {
+            const response = await fetch(`http://localhost:3000/api/ugyfelek/${selectedUser.felhasznalo_id}`, {
+                method: 'DELETE'
+            });
+            if (response.ok) {
+                toaster.push(<Message type="success">Felhasználó törölve!</Message>, { placement: 'topCenter' });
+                setSelectedUser(null);
+                fetchUsers();
             }
+        } catch (error) {
+            console.error(error);
+            toaster.push(<Message type="error">Hiba a törléskor!</Message>, { placement: 'topCenter' });
         }
     };
 
-    // Időpont törlése
-    const handleDeleteAppointment = async (id) => {
-        if (window.confirm('Biztosan törölni szeretné ezt az időpontot?')) {
-            try {
-                const response = await fetch(`http://localhost:3000/api/idopontok/${id}`, {
-                    method: 'DELETE'
-                });
-                if (response.ok) {
-                    alert('Időpont törölve!');
-                    fetchAppointments(); // Lista frissítése
-                }
-            } catch (error) {
-                console.error(error);
+    // Tényleges időpont törlés
+    const executeDeleteAppointment = async (id) => {
+        try {
+            const response = await fetch(`http://localhost:3000/api/idopontok/${id}`, {
+                method: 'DELETE'
+            });
+            if (response.ok) {
+                toaster.push(<Message type="success">Időpont törölve!</Message>, { placement: 'topCenter' });
+                fetchAppointments(); // Lista frissítése
             }
+        } catch (error) {
+            console.error(error);
+            toaster.push(<Message type="error">Hiba a törléskor!</Message>, { placement: 'topCenter' });
+        }
+    };
+
+    // Modal "Igen" gombja
+    const handleConfirmDelete = () => {
+        setModalOpen(false);
+        if (deleteAction) {
+            deleteAction();
         }
     };
 
@@ -216,7 +244,7 @@ function Admin() {
 
                                 <div className="admin-buttons">
                                     <button className="bej-reg_gomb" onClick={handleSave}>Mentés</button>
-                                    <button className="bej-reg_gomb admin-delete-button" onClick={handleDelete}>Törlés</button>
+                                    <button className="bej-reg_gomb admin-delete-button" onClick={confirmDeleteUser}>Törlés</button>
                                 </div>
                             </div>
                         ) : (
@@ -256,7 +284,7 @@ function Admin() {
                                     <td style={{ padding: '10px' }}>{app.szolgaltatas_nev}</td>
                                     <td style={{ padding: '10px' }}>
                                         <button 
-                                            onClick={() => handleDeleteAppointment(app.idopont_id)} 
+                                            onClick={() => confirmDeleteAppointment(app.idopont_id)} 
                                             style={{ color: 'white', backgroundColor: '#d9534f', border: 'none', padding: '5px 10px', borderRadius: '4px', cursor: 'pointer' }}
                                         >
                                             Törlés
@@ -273,6 +301,16 @@ function Admin() {
                     </table>
                 </div>
             )}
+
+            {/* Törlés megerősítő Modal */}
+            <Modal open={modalOpen} onClose={() => setModalOpen(false)} size="xs">
+                <Modal.Header><Modal.Title>Törlés megerősítése</Modal.Title></Modal.Header>
+                <Modal.Body>Biztosan törölni szeretné a kiválasztott elemet?</Modal.Body>
+                <Modal.Footer>
+                    <Button onClick={handleConfirmDelete} appearance="primary" color="red">Törlés</Button>
+                    <Button onClick={() => setModalOpen(false)} appearance="subtle">Mégse</Button>
+                </Modal.Footer>
+            </Modal>
         </div>
     );
 }

@@ -1,8 +1,8 @@
 function Home()
 {
     return(
-        <div class="home-container">
-            <img src="/képek/fodtraszj.png" alt="Fodrász" class="home-image" />
+        <div className="home-container">
+            <img src="/képek/fodtraszj.png" alt="Fodrász" className="home-image" />
             <div>
                 <h2>
                     Rólam
