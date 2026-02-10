@@ -61,3 +61,16 @@ exports.createAppointment = async (req, res) => {
         res.status(500).json({ error: "Hiba a mentéskor" });
     }
 };
+
+// Időpont törlése
+exports.deleteAppointment = async (req, res) => {
+    const { id } = req.params;
+    try {
+        const db = await getDb();
+        await db.run('DELETE FROM idopont WHERE idopont_id = ?', [id]);
+        res.status(200).json({ message: 'Időpont törölve!' });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ error: "Hiba a törléskor" });
+    }
+};
