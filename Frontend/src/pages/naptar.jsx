@@ -45,7 +45,8 @@ const Naptar = () => {
   }, []);
 
   const fetchAppointments = () => {
-    fetch('http://localhost:3000/api/idopontok')
+    // Cache busting hozzáadása, hogy biztosan a legfrissebb adatokat kapjuk
+    fetch(`http://localhost:3000/api/idopontok?_=${Date.now()}`)
       .then(res => res.json())
       .then(data => setAppointments(data))
       .catch(err => console.error("Időpont hiba:", err));
@@ -79,6 +80,15 @@ const Naptar = () => {
     return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`;
   };
 
+  // Segédfüggvény a dátum formázásához (Helyi idő szerint)
+  const formatDate = (date) => {
+    if (!date) return '';
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+  };
+
   // Időpontok generálása az adott napra
   const getTodoList = (date) => {
     if (!date) return [];
@@ -90,7 +100,7 @@ const Naptar = () => {
     // Ha nincs beállítás az adott napra (pl. Vasárnap nincs az adatbázisban), akkor zárva
     if (!dayConfig) return [];
 
-    const dateStr = date.toISOString().split('T')[0];
+    const dateStr = formatDate(date);
     const list = [];
 
     // Szűrés: csak az adott napra és a kiválasztott fodrászra vonatkozó foglalások
@@ -162,11 +172,13 @@ const Naptar = () => {
     }
     const user = JSON.parse(userStr);
 
+    const formattedDate = formatDate(selectedDate);
+
     const body = {
       felhasznalo_id: user.felhasznalo_id,
       fodrasz_id: selectedHairdresserId,
       szolgaltatas_id: selectedServiceId,
-      idopont_datuma: selectedDate.toISOString().split('T')[0],
+      idopont_datuma: formattedDate,
       kezdesi_ido: selectedTime
     };
 

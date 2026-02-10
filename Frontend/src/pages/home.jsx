@@ -8,10 +8,10 @@ function Home()
                     Rólam
                 </h2>
                 <p>
-                    Sok tájat jártam, számos hajstilust láttam és elsajátitottam a művészetüket
+                    Sok tájat jártam, számos hajstílust láttam és elsajátítottam a művészetüket.
                 </p>
                 <p>
-                    Számos munkám során örömmel tölt el hogy a fodrász vállalkozásomat
+                    Számos munkám során örömmel tölt el, hogy a fodrász vállalkozásomat vezethetem.
                 </p>
             </div>
 

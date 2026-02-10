@@ -41,11 +41,31 @@ exports.createAppointment = async (req, res) => {
         
         if (!szolg) return res.status(404).json({ error: "Nincs ilyen szolgáltatás" });
 
-        // Az adatbázis séma ('Adatbazis.txt') alapján az 'idopont' táblának nincs 'befejezesi_ido' oszlopa.
-        // Ha szeretnéd tárolni, add hozzá az oszlopot a CREATE TABLE parancshoz.
-        // Például: befejezesi_ido TEXT
-        // A számításhoz használhatod a 'strftime' SQLite függvényt:
-        // const befejezesi_ido = await db.get("SELECT strftime('%H:%M:%S', ?, ? || ' minutes')", [kezdesi_ido, szolg.ido]);
+        // --- BUG FIX: Szerver oldali ütközés vizsgálat ---
+        const durationMinutes = szolg.ido * 20;
+        const [reqHour, reqMin] = kezdesi_ido.split(':').map(Number);
+        const reqStart = reqHour * 60 + reqMin;
+        const reqEnd = reqStart + durationMinutes;
+
+        // Lekérjük az adott napra és fodrászra vonatkozó foglalásokat
+        const existingApps = await db.all(`
+            SELECT i.kezdesi_ido, s.ido 
+            FROM idopont i 
+            JOIN szolgaltatas s ON i.szolgaltatas_id = s.szolgaltatas_id 
+            WHERE i.fodrasz_id = ? AND i.idopont_datuma = ?
+        `, [fodrasz_id, idopont_datuma]);
+
+        for (const app of existingApps) {
+            const [appHour, appMin] = app.kezdesi_ido.split(':').map(Number);
+            const appStart = appHour * 60 + appMin;
+            const appEnd = appStart + (app.ido * 20);
+
+            // Ütközés vizsgálat: (StartA < EndB) és (EndA > StartB)
+            if (reqStart < appEnd && reqEnd > appStart) {
+                return res.status(409).json({ error: "A választott időpontban a fodrász már foglalt." });
+            }
+        }
+        // -------------------------------------------------
 
         const sql = `
             INSERT INTO idopont 
