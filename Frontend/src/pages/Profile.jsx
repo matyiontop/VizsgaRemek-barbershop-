@@ -68,6 +68,14 @@ function Profile() {
         }
     };
 
+    // Segédfüggvény: Lemondható-e az időpont (több mint 24 óra van hátra)
+    const isCancellable = (dateStr, timeStr) => {
+        const appDate = new Date(`${dateStr}T${timeStr}`);
+        const now = new Date();
+        const diffInHours = (appDate - now) / (1000 * 60 * 60);
+        return diffInHours >= 24;
+    };
+
     return (
         <div className="bej-reg_doboz" style={{ maxWidth: '800px' }}>
             <h2>Profilom - Foglalásaim</h2>
@@ -89,29 +97,33 @@ function Profile() {
                         </tr>
                     </thead>
                     <tbody>
-                        {appointments.map(app => (
-                            <tr key={app.idopont_id} style={{ borderBottom: '1px solid #eee' }}>
-                                <td style={{ padding: '10px' }}>{app.idopont_datuma}</td>
-                                <td style={{ padding: '10px' }}>{app.kezdesi_ido}</td>
-                                <td style={{ padding: '10px' }}>{app.szolgaltatas_nev} ({app.ar} Ft)</td>
-                                <td style={{ padding: '10px' }}>{app.fodrasz_nev}</td>
-                                <td style={{ padding: '10px' }}>
-                                    <button 
-                                        onClick={() => initiateCancel(app.idopont_id)}
-                                        style={{ 
-                                            backgroundColor: '#d9534f', 
-                                            color: 'white', 
-                                            border: 'none', 
-                                            padding: '5px 10px', 
-                                            borderRadius: '4px', 
-                                            cursor: 'pointer' 
-                                        }}
-                                    >
-                                        Lemondás
-                                    </button>
-                                </td>
-                            </tr>
-                        ))}
+                        {appointments.map(app => {
+                            const cancellable = isCancellable(app.idopont_datuma, app.kezdesi_ido);
+                            return (
+                                <tr key={app.idopont_id} style={{ borderBottom: '1px solid #eee' }}>
+                                    <td style={{ padding: '10px' }}>{app.idopont_datuma}</td>
+                                    <td style={{ padding: '10px' }}>{app.kezdesi_ido}</td>
+                                    <td style={{ padding: '10px' }}>{app.szolgaltatas_nev} ({app.ar} Ft)</td>
+                                    <td style={{ padding: '10px' }}>{app.fodrasz_nev}</td>
+                                    <td style={{ padding: '10px' }}>
+                                        <button 
+                                            onClick={() => cancellable && initiateCancel(app.idopont_id)}
+                                            disabled={!cancellable}
+                                            style={{ 
+                                                backgroundColor: cancellable ? '#d9534f' : '#ccc', 
+                                                color: 'white', 
+                                                border: 'none', 
+                                                padding: '5px 10px', 
+                                                borderRadius: '4px', 
+                                                cursor: cancellable ? 'pointer' : 'not-allowed' 
+                                            }}
+                                        >
+                                            Lemondás
+                                        </button>
+                                    </td>
+                                </tr>
+                            );
+                        })}
                     </tbody>
                 </table>
             )}

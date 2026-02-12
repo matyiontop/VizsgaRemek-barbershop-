@@ -224,21 +224,47 @@ const Naptar = () => {
     return allBooked;
   };
 
-  // Pöttyök megjelenítése (Zöld: teljesen szabad, Piros: van foglalás)
+  // Pöttyök megjelenítése (Zöld: szabad, Sárga: félig teli, Piros: nincs hely a szolgáltatásnak)
   const renderCell = (date) => {
-    // Ha a nap le van tiltva (múlt, zárva, vagy tele), ne mutasson semmit
-    if (isDateDisabled(date)) return null;
-
+    // 1. Múltbéli dátumok és zárva tartás esetén ne mutasson semmit
+    if (date < new Date().setHours(0, 0, 0, 0)) return null;
+    
     const list = getTodoList(date);
-    // Csak a tényleges foglalásokat nézzük, az ebédidőt ne számítsuk bele a piros jelzésbe
-    const hasBooking = list.some(i => i.booked && i.title !== 'Ebédidő');
+    if (list.length === 0) return null; // Zárva
 
-    if (!hasBooking) {
-      // Ha nincs foglalás, minden szabad -> Zöld pötty
-      return <Badge style={{ background: '#52c41a' }} />;
+    // 2. Ellenőrizzük, hogy van-e elég hosszú szabad hely a választott szolgáltatásnak
+    let hasValidSlot = false;
+    
+    // Végigmegyünk a listán, hogy találunk-e 'durationMultiplier' hosszúságú szabad blokkot
+    for (let i = 0; i <= list.length - durationMultiplier; i++) {
+      let isSlotFree = true;
+      for (let j = 0; j < durationMultiplier; j++) {
+        if (list[i + j].booked) {
+          isSlotFree = false;
+          break;
+        }
+      }
+      if (isSlotFree) {
+        hasValidSlot = true;
+        break;
+      }
+    }
+
+    // Ha nincs megfelelő szabad hely -> Piros
+    if (!hasValidSlot) {
+      return <Badge style={{ background: '#f44336' }} />;
+    }
+
+    // 3. Ha van hely, nézzük a foglaltságot (Sárga vs Zöld)
+    const totalSlots = list.length;
+    const bookedSlots = list.filter(i => i.booked).length;
+
+    if (bookedSlots > totalSlots / 2) {
+      // Több mint a fele foglalt -> Sárga
+      return <Badge style={{ background: '#faad14' }} />;
     } else {
-      // Ha van foglalás (de még lehet szabad hely, vagy tele van) -> Piros pötty (alapértelmezett)
-      return <Badge />;
+      // Kevesebb mint a fele foglalt -> Zöld
+      return <Badge style={{ background: '#52c41a' }} />;
     }
   };
 
