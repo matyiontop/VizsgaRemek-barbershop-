@@ -15,7 +15,7 @@ function Footer() {
 
         <div>
           <h3>Németh Fodrászat</h3>
-          <p>Cím: 1234 Budapest, Példa utca 1.</p>
+          <p>Cím: Kiskunhalas, Majsai út 2, 6400</p>
           <p>&copy; 2025 Minden jog fenntartva.</p>
         </div>
       </div>
