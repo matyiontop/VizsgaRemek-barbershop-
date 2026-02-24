@@ -59,3 +59,46 @@ A rendszer relációs adatbázist használ az alábbi fő entitásokkal:
 - **felhasznalo:** Ügyfelek adatai és jogosultsági szintjei.
 - **idopont:** A foglalások központi táblája, amely összeköti a felhasználót, a fodrászt és a szolgáltatást.
 - **fodrasz, szolgaltatas, munkaido, idosav:** Törzsadatok a foglalási rendszer működéséhez.
+
+## 5. Backend Tervezés
+
+A backend architektúra MVC (Model-View-Controller) mintát követ, ahol a View szerepét a React frontend tölti be, így a backend API-ként funkcionál.
+
+### a. Screenek és Adatigények (Frontend-Backend Kapcsolat)
+A frontend képernyők kiszolgálása az alábbi adatkapcsolatokkal valósul meg:
+
+- **Bejelentkezés / Regisztráció képernyő:**
+  - *Endpoint:* `/api/ugyfelek/login`, `/api/ugyfelek/register`
+  - *Adat:* Hitelesítési adatok (email, jelszó) küldése, Token fogadása.
+- **Időpontfoglalás (Naptár) képernyő:**
+  - *Endpoint:* `/api/szolgaltatasok` (lista betöltése), `/api/fodraszok` (választás), `/api/idopontok` (foglalt sávok lekérése).
+  - *Logika:* A rendszernek vissza kell adnia a szabad és foglalt időpontokat a naptár kirajzolásához.
+- **Admin Dashboard:**
+  - *Endpoint:* `/api/idopontok` (összes foglalás), `/api/ugyfelek` (felhasználók kezelése).
+  - *Adat:* Teljes hozzáférés az adatbázis rekordjaihoz szerkesztési joggal.
+
+### b. Routing (Útvonalválasztás)
+A központi útvonalválasztást az `index.js` végzi, amely modulárisan szervezi ki a kéréseket az alábbi router fájlokba:
+
+- `ugyfelRoutes.js`: Felhasználói fiók műveletek (auth).
+- `fodraszRoutes.js`: Fodrászok listázása és adatlapja.
+- `idopontRoutes.js`: Foglalások lekérdezése, létrehozása, törlése.
+- `szolgaltatasRoutes.js`: Elérhető szolgáltatások és árak.
+- `munkaidoRoutes.js`: Fodrászok beosztásának kezelése.
+
+### c. Middlewares (Köztes rétegek)
+A kérések feldolgozása során az alábbi middleware-ek futnak le:
+
+1.  **CORS (Cross-Origin Resource Sharing):** Engedélyezi, hogy a React frontend (másik porton/domainen) kommunikálhasson a szerverrel.
+2.  **Express JSON Parser:** A beérkező HTTP kérések törzsét (body) JSON objektummá alakítja.
+3.  **Error Handling:** Globális hibakezelő a nem létező útvonalak (404) és szerverhibák (500) elfogására.
+4.  **Auth Middleware (Tervezett):** A védett végpontok (pl. foglalás leadása, admin funkciók) előtt ellenőrzi a JWT token érvényességét.
+
+### d. Modellek (Adatbázis Séma - D1)
+Az adatok tárolása Cloudflare D1 (SQLite) adatbázisban történik. A modellek SQL táblákat reprezentálnak:
+
+- **Felhasznalo:** `id` (PK), `nev`, `email` (Unique), `jelszo` (Hash), `szerepkor` (user/admin).
+- **Fodrasz:** `id` (PK), `nev`, `leiras`.
+- **Szolgaltatas:** `id` (PK), `megnevezes`, `ar`, `idotartam_perc`.
+- **Idopont:** `id` (PK), `ugyfel_id` (FK), `fodrasz_id` (FK), `szolgaltatas_id` (FK), `datum_kezdet`, `statusz`.
+- **Munkaido:** `id` (PK), `fodrasz_id` (FK), `nap_neve`, `kezdes_ora`, `vegzes_ora`.
