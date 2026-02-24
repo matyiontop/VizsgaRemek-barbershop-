@@ -3,7 +3,9 @@ const getDb = require('../db');
 
 // Új ügyfél regisztrálása
 exports.regisztracio = async (req, res) => {
-    const { nev, email, jelszo } = req.body;
+    const nev = req.body.nev ? req.body.nev.trim() : null;
+    const email = req.body.email ? req.body.email.trim().toLowerCase() : null;
+    const jelszo = req.body.jelszo;
     console.log('Regisztrációs kérés érkezett:', { nev, email });
 
     // Alapvető validáció
@@ -25,8 +27,8 @@ exports.regisztracio = async (req, res) => {
 
         // 3. Mentés az adatbázisba
         // Explicit módon beállítjuk a 'szerep' oszlopot 'U'-ra (User)
-        const sql = 'INSERT INTO felhasznalo (nev, email, jelszo, szerep) VALUES (?, ?, ?, ?)';
-        const result = await db.run(sql, [nev, email, hashedPassword, 'U']);
+        const sql = 'INSERT INTO felhasznalo (nev, email, jelszo, szerep, engedely) VALUES (?, ?, ?, ?, ?)';
+        const result = await db.run(sql, [nev, email, hashedPassword, 'U', 1]);
         console.log('Adatbázis beszúrás eredménye:', result);
 
         res.status(201).json({ message: 'Sikeres regisztráció!', userId: result.lastID });
@@ -38,7 +40,8 @@ exports.regisztracio = async (req, res) => {
 
 // Bejelentkezés
 exports.bejelentkezes = async (req, res) => {
-    const { email, jelszo } = req.body;
+    const email = req.body.email ? req.body.email.trim().toLowerCase() : null;
+    const jelszo = req.body.jelszo;
     console.log('Bejelentkezési kérés:', email);
 
     if (!email || !jelszo) {
